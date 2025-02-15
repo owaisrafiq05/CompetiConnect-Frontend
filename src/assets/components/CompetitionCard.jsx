@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { toast, Toaster } from "sonner";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardHeader,
@@ -20,6 +22,7 @@ const CompetitionCard = ({ comp }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   
   const getUserId = () => {
     const uidCookie = document.cookie
@@ -34,8 +37,9 @@ const CompetitionCard = ({ comp }) => {
 
   const handleJoinCompetition = async () => {
     const userId = getUserId();
+    console.log(userId);
     if (!userId) {
-      setError("Please login to join competitions");
+      toast.error("Please login to join competitions");
       return;
     }
 
@@ -44,13 +48,11 @@ const CompetitionCard = ({ comp }) => {
 
     try {
       if (comp.isPrivate) {
-        // Check if file is selected for private competitions
         if (!selectedFile) {
-          setError("Please select a file to upload");
+          toast.error("Please select a file to upload");
           return;
         }
         
-        // Make API call for private competition
         const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${comp.id}/register`, {
           method: 'POST',
           headers: {
@@ -62,10 +64,11 @@ const CompetitionCard = ({ comp }) => {
         if (!response.ok) {
           throw new Error('Failed to register for private competition');
         }
+        
+        toast.success('Successfully joined private competition!');
       } else {
-        // Make API call for public competition
         const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${comp.id}/participants`, {
-          method: 'POST',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -75,12 +78,17 @@ const CompetitionCard = ({ comp }) => {
         if (!response.ok) {
           throw new Error('Failed to join public competition');
         }
+
+        toast.success('Successfully joined competition!');
       }
 
-      // Close modal and reset state on success
       setIsModalOpen(false);
       setSelectedFile(null);
+      
+      navigate(`/competition-page/${comp.id}`);
+      
     } catch (err) {
+      toast.error(err.message);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -99,6 +107,7 @@ const CompetitionCard = ({ comp }) => {
     <>
       <Card className="relative min-h-[280px] max-w-[350px] bg-dark text-white shadow-lg border-4 border-transparent animate-border rounded-xl 
         transition-all duration-300 ease-in-out hover:shadow-[0px_0px_20px_rgba(255,255,255,0.7)] hover:scale-105 p-4">
+      
         
         {comp.isPrivate && (
           <LockClosedIcon className="w-6 h-6 text-red-500 absolute top-3 right-3" />
