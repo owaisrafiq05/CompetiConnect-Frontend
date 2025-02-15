@@ -34,6 +34,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
   const handleLogout = () => {
     document.cookie = 'token=; Max-Age=0; path=/'; // Delete token from cookies
+    document.cookie = 'userID=; Max-Age=0; path=/';
     setIsSignedIn(false); // Update sign-in status
     setUserInfo({ username: "", email: "" }); // Clear user info
     navigate('/login'); // Redirect to login page
