@@ -93,13 +93,15 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <button
               className="w-full bg-red hover:bg-red text-white font-medium py-2 rounded-lg"
               onClick={() => {
-                setIsSignedIn(true); // Simulate login
                 navigate('/login'); // Redirect to login page
               }} 
             >
               Login
             </button>
-            <p className="text-sm text-gray-400 mt-2 text-center">
+            <p className="text-sm text-gray-400 mt-2 text-center"
+            onClick={() => {
+              navigate('/signup'); // Redirect to login page
+            }} >
               Sign in to continue
             </p>
           </>
