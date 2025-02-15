@@ -19,17 +19,17 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         <ul className="mt-8 space-y-2">
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-            Home
+            My Competitions
           </li>
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-            Competitions
+            Explore
           </li>
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-            Leaderboard
+           Profile
           </li>
-          <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-            Announcements
-          </li>
+          {/* <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
+            
+          </li> */}
         </ul>
       </div>
 

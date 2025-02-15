@@ -2,7 +2,7 @@ import React from "react";
 
 const Title = ({ title, subtitle }) => {
   return (
-    <div className="text-center my-4 mt-20 mb-10">
+    <div className="text-center my-4 mt-20 mb-8">
       <p className="text-sm sm:text-base font-medium uppercase text-gray-800 tracking-widest">
         {subtitle}
       </p>
