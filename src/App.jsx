@@ -7,6 +7,8 @@ import Explore from "./pages/Explore";
 import Profile from "./pages/Profile";
 import Home from "./pages/Home"; // ✅ FIX: Import Home
 import CompetitonPage from "./pages/CompetitonPage";
+import Login from "./pages/Login";
+import { toast , Toaster } from "sonner";
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,6 +20,7 @@ const App = () => {
   return (
     <div className="flex">
       {/* Sidebar */}
+      <Toaster/>
       <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
       {/* Main Content Area */}
@@ -33,6 +36,7 @@ const App = () => {
             <Route path="/explore" element={<Explore />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/competition-page" element={<CompetitonPage/>} />
+            <Route path="/login" element={<Login/>} />
           </Routes>
         </div>
       </div>

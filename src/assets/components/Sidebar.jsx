@@ -1,9 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { XMarkIcon, ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [isSignedIn, setIsSignedIn] = useState(false); // Dummy control for sign-in status
+  const [userInfo, setUserInfo] = useState({ username: "", email: "" }); // State for user info
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  useEffect(() => {
+    const uid = document.cookie.split('; ').find(row => row.startsWith('userID='));
+    if (uid) {
+      const uidValue = uid.split('=')[1]; // Extract the uid value directly
+      setIsSignedIn(true); // Check if token exists
+      
+      // Fetch user details from the API using the correct uid
+      axios.get(`http://localhost:5000/auth/user/${uidValue}`) // Use uidValue directly in the URL
+        .then(response => {
+          if (response.data.message === "User details fetched successfully") {
+            const { username, email } = response.data.data; // Extract username and email
+            setUserInfo({ username, email }); // Set user info
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching user details:", error);
+        });
+    }
+  }, []);
+
+  const handleLogout = () => {
+    document.cookie = 'token=; Max-Age=0; path=/'; // Delete token from cookies
+    setIsSignedIn(false); // Update sign-in status
+    setUserInfo({ username: "", email: "" }); // Clear user info
+    navigate('/login'); // Redirect to login page
+  };
 
   return (
     <div
@@ -20,16 +50,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         <ul className="mt-8 space-y-2">
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-          <Link to="/">Home</Link>
+            <Link to="/">Home</Link>
           </li>
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-          <Link to="/competitions">My Competitions</Link>
+            <Link to="/competitions">My Competitions</Link>
           </li>
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-          <Link to="/explore">Explore</Link>
+            <Link to="/explore">Explore</Link>
           </li>
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-          <Link to="/profile">Profile</Link>
+            <Link to="/profile">Profile</Link>
           </li>
         </ul>
       </div>
@@ -37,11 +67,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       <div className="absolute bottom-4 left-0 w-full p-4 border-t border-gray-700">
         {isSignedIn ? (
           <>
-            <h3 className="text-lg font-semibold">John Doe</h3>
-            <p className="text-sm text-gray-400">johndoe@example.com</p>
+            <h3 className="text-lg font-semibold">{userInfo.username}  {userInfo.uid}</h3>
+            <p className="text-sm text-gray-400">{userInfo.email}</p>
             <button
               className="flex items-center gap-2 text-red-400 hover:text-red-300 mt-3"
-              onClick={() => setIsSignedIn(false)} // Simulate logout
+              onClick={handleLogout} // Call handleLogout on click
             >
               <ArrowLeftOnRectangleIcon className="w-5 h-5" />
               Exit
@@ -51,7 +81,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <>
             <button
               className="w-full bg-red hover:bg-red text-white font-medium py-2 rounded-lg"
-              onClick={() => setIsSignedIn(true)} // Simulate login
+              onClick={() => {
+                setIsSignedIn(true); // Simulate login
+                navigate('/login'); // Redirect to login page
+              }} 
             >
               Login
             </button>
