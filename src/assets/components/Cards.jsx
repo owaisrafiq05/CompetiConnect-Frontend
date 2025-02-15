@@ -2,34 +2,7 @@ import React, { useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import CompetitionCard from "./CompetitionCard";
 
-const competitions = [
-  {
-    id: 1,
-    name: "Code Clash",
-    description: "A coding competition for JavaScript developers.",
-    admin: "John Doe",
-    entryFee: "$10",
-    isPrivate: false,
-  },
-  {
-    id: 2,
-    name: "AI Challenge",
-    description: "Compete in AI and Machine Learning challenges.",
-    admin: "Sarah Lee",
-    entryFee: "Free",
-    isPrivate: true,
-  },
-  {
-    id: 3,
-    name: "Design Sprint",
-    description: "A UI/UX design competition with real-world challenges.",
-    admin: "Emma Smith",
-    entryFee: "$5",
-    isPrivate: false,
-  },
-];
-
-const Cards = () => {
+const Cards = ({ competitions }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredCompetitions = competitions.filter((comp) =>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -17,9 +17,82 @@ import { LockClosedIcon } from "@heroicons/react/24/solid";
 
 const CompetitionCard = ({ comp }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   
+  const getUserId = () => {
+    const uidCookie = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('userID='));
+    return uidCookie ? uidCookie.split('=')[1] : null;
+  };
+
   const handleFileChange = (event) => {
-    console.log("Selected file:", event.target.files[0]);
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleJoinCompetition = async () => {
+    const userId = getUserId();
+    if (!userId) {
+      setError("Please login to join competitions");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (comp.isPrivate) {
+        // Check if file is selected for private competitions
+        if (!selectedFile) {
+          setError("Please select a file to upload");
+          return;
+        }
+        
+        // Make API call for private competition
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${comp.id}/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to register for private competition');
+        }
+      } else {
+        // Make API call for public competition
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${comp.id}/participants`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to join public competition');
+        }
+      }
+
+      // Close modal and reset state on success
+      setIsModalOpen(false);
+      setSelectedFile(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoinClick = () => {
+    if (comp.isPrivate) {
+      setIsModalOpen(true);
+    } else {
+      handleJoinCompetition();
+    }
   };
 
   return (
@@ -46,24 +119,53 @@ const CompetitionCard = ({ comp }) => {
           <p className="text-sm font-semibold">
             Entry Fee: <span className="text-red font-bold text-md">{comp.entryFee}</span>
           </p>
-          <Button className="bg-red rounded-lg" onClick={() => setIsModalOpen(true)}>Join Now</Button>
+          <Button 
+            className="bg-red rounded-lg" 
+            onClick={handleJoinClick}
+            disabled={loading}
+          >
+            {loading ? 'Processing...' : 'Join Now'}
+          </Button>
         </CardFooter>
       </Card>
       
-      {/* ✅ Fix: Use NextUI Modal */}
-      <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen} className="bg-white rounded-lg">
-        <ModalContent>
-          <ModalHeader>Upload Your File</ModalHeader>
-          <ModalBody>
-            <p className="text-sm text-gray-600 mb-3">Please select a file to upload for this competition.</p>
-            <Input type="file" onChange={handleFileChange} className="border border-gray-300 rounded-md p-2 w-full" />
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="light" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button className="bg-red rounded-lg text-white"  onClick={() => setIsModalOpen(false)}>Upload</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      {comp.isPrivate && (
+        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen} className="bg-white rounded-lg">
+          <ModalContent>
+            <ModalHeader>Upload Your File</ModalHeader>
+            <ModalBody>
+              <p className="text-sm text-gray-600 mb-3">Please select a file to upload for this competition.</p>
+              <Input 
+                type="file" 
+                onChange={handleFileChange} 
+                className="border border-gray-300 rounded-md p-2 w-full" 
+              />
+              {error && (
+                <p className="text-red-500 text-sm mt-2">{error}</p>
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button 
+                variant="light" 
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setError(null);
+                }}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button 
+                className="bg-red rounded-lg text-white"
+                onClick={handleJoinCompetition}
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : 'Upload & Join'}
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
     </>
   );
 };
