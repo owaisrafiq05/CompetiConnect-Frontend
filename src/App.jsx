@@ -1,10 +1,11 @@
 import React, { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import Sidebar from "./assets/components/Sidebar";
 import Navbar from "./assets/components/Navbar";
-import Banner from "./assets/components/Banner";
-import Cards from "./assets/components/Cards";
-import Title from "./assets/components/Title"
-
+import Competition from "./pages/Competition";
+import Explore from "./pages/Explore";
+import Profile from "./pages/Profile";
+import Home from "./pages/Home"; // ✅ FIX: Import Home
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,11 +26,12 @@ const App = () => {
 
         {/* Page Content */}
         <div>
-          <Banner/>
-          <div className="p-6">
-          <Title subtitle="Join A Competition" title="Select a challenge and showcase your skills" />
-          <Cards/>
-          </div>
+          <Routes>
+            <Route path="/" element={<Home />} /> {/* ✅ Home Route Fixed */}
+            <Route path="/competitions" element={<Competition />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/profile" element={<Profile />} />
+          </Routes>
         </div>
       </div>
     </div>

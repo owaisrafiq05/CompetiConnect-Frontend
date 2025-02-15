@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { XMarkIcon, ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline";
+import { Link } from "react-router-dom";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [isSignedIn, setIsSignedIn] = useState(false); // Dummy control for sign-in status
@@ -19,17 +20,17 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         <ul className="mt-8 space-y-2">
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-            My Competitions
+          <Link to="/">Home</Link>
           </li>
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-            Explore
+          <Link to="/competitions">My Competitions</Link>
           </li>
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-           Profile
+          <Link to="/explore">Explore</Link>
           </li>
-          {/* <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-            
-          </li> */}
+          <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
+          <Link to="/profile">Profile</Link>
+          </li>
         </ul>
       </div>
 
