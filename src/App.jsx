@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import Home from "./pages/Home"; // ✅ FIX: Import Home
 import CompetitonPage from "./pages/CompetitonPage";
 import Login from "./pages/Login";
+import SignUp from "./pages/Signup"
 import { toast , Toaster } from "sonner";
 
 const App = () => {
@@ -37,6 +38,7 @@ const App = () => {
             <Route path="/profile" element={<Profile />} />
             <Route path="/competition-page" element={<CompetitonPage/>} />
             <Route path="/login" element={<Login/>} />
+            <Route path="/signup" element={<SignUp/>} />
           </Routes>
         </div>
       </div>
