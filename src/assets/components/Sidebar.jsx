@@ -34,6 +34,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
           <Link to="/profile">Profile</Link>
           </li>
+          <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
+          <Link to="/competition-page">compname</Link>
+          </li>
           <li><Button className="bg-red rounded-lg w-full mt-1 text-white" onClick={``}>
         Add Competition
       </Button></li>
