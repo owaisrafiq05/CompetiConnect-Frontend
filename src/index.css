@@ -40,3 +40,7 @@ body {
   .text-red{
     color:rgba(182, 46, 46, 1) ;
   }
+
+  .border-red{
+    color:rgba(182, 46, 46, 1);
+  }

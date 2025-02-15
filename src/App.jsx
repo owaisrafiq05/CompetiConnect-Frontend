@@ -6,6 +6,7 @@ import Competition from "./pages/Competition";
 import Explore from "./pages/Explore";
 import Profile from "./pages/Profile";
 import Home from "./pages/Home"; // ✅ FIX: Import Home
+import CompetitonPage from "./pages/CompetitonPage";
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,6 +32,7 @@ const App = () => {
             <Route path="/competitions" element={<Competition />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/competition-page" element={<CompetitonPage/>} />
           </Routes>
         </div>
       </div>
