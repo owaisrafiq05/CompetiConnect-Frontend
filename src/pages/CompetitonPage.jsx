@@ -1,17 +1,64 @@
 import React, { useState } from "react";
 import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  getKeyValue,
-} from "@heroui/react";
+    Table,
+    TableHeader,
+    TableColumn,
+    TableBody,
+    TableRow,
+    TableCell,
+    getKeyValue,
+    Input,
+    Button,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+  } from "@heroui/react";
 import { Select, SelectItem } from "@heroui/react";
+import { useEffect } from "react";
+
 
 const CompetitionPage = () => {
   const [activeTab, setActiveTab] = useState("problems");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const [content, setContent] = useState({ problems: "", rulebook: "" });
+
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleUpload = () => {
+    if (selectedFile) {
+      console.log("Uploading:", selectedFile);
+      setIsModalOpen(false);
+    } else {
+      alert("Please select a file first!");
+    }
+  };
+
+  // Fetch data from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("YOUR_API_URL_HERE");
+        const data = await response.json();
+
+        // Assuming API response has "problems" and "rulebook" keys
+        setContent({
+          problems: data.problems || "No problems available.",
+          rulebook: data.rulebook || "No rulebook available.",
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const [announcements, setAnnouncements] = useState([
     {
@@ -94,11 +141,11 @@ const CompetitionPage = () => {
       {/* Tabs Navigation */}
       <div className="bg-white shadow-md py-3 px-4">
         {/* Show tabs as buttons on larger screens */}
-        <div className="hidden md:flex md:justify-center space-x-6">
+        <div className="max-[869px]:hidden  flex justify-center space-x-6">
           {tabs.map((tab) => (
             <button
               key={tab.key}
-              className={`py-2 px-6 text-lg font-medium border-b-4 transition-all ${
+              className={`py-2 px-6 text-md font-medium border-b-4 transition-all ${
                 activeTab === tab.key
                   ? "border-red-600 text-red-600 font-semibold"
                   : "border-transparent text-gray-500 hover:text-red-600"
@@ -111,23 +158,29 @@ const CompetitionPage = () => {
         </div>
 
         {/* Show dropdown on mobile screens */}
-        <div className="md:hidden">
+        <div className="min-[870px]:hidden flex w-full flex-wrap ">
           <Select
-            className="w-full"
-            label="Select Tab"
+            className="w-full border-1 rounded-lg" // Increased border radius
             selectedKey={activeTab}
             onSelectionChange={(selection) => {
-              const selectedKey = selection?.currentKey || selection; // Extract key if it's wrapped
+              const selectedKey = selection?.currentKey || selection;
               console.log("Selected Key:", selectedKey);
               setActiveTab(String(selectedKey));
             }}
           >
             {tabs.map((tab) => (
-              <SelectItem key={tab.key}>{tab.label}</SelectItem>
+              <SelectItem
+                key={tab.key}
+                className="bg-red text-white rounded-lg" // Rounder edges for items
+              >
+                {tab.label}
+              </SelectItem>
             ))}
           </Select>
-          <p>Active Tab: {activeTab}</p>
         </div>
+        <Button className="bg-red rounded-lg w-32 mr-auto text-white" onClick={() => setIsModalOpen(true)}>
+        Submit
+      </Button>
       </div>
 
       {/* Tab Content */}
@@ -169,6 +222,9 @@ const CompetitionPage = () => {
           </div>
         )}
 
+        {activeTab === "problems" && <div>{content.problems}</div>}
+        {activeTab === "rulebook" && <div>{content.rulebook}</div>}
+
         {activeTab === "leaderboard" && (
           <div>
             <div className="overflow-x-auto">
@@ -202,6 +258,27 @@ const CompetitionPage = () => {
           </div>
         )}
       </div>
+      {/* File Upload Modal */}
+      <Modal className="bg-white rounded-lg" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ModalContent>
+          <ModalHeader>Upload Your File</ModalHeader>
+          <ModalBody>
+            <input
+              type="file"
+              className="border p-2 w-full rounded-lg"
+              onChange={handleFileChange}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button className="bg-gray-500 rounded-lg" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-red text-white rounded-lg" onClick={handleUpload}>
+              Upload
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };

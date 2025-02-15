@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { XMarkIcon, ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [isSignedIn, setIsSignedIn] = useState(false); // Dummy control for sign-in status
@@ -61,6 +61,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
             <Link to="/profile">Profile</Link>
           </li>
+          <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
+          <Link to="/competition-page">compname</Link>
+          </li>
+          <li><Button className="bg-red rounded-lg w-full mt-1 text-white" onClick={``}>
+        Add Competition
+      </Button></li>
         </ul>
       </div>
 
