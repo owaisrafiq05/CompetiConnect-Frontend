@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { toast, Toaster } from "sonner";
 import {
     Table,
     TableHeader,
@@ -16,16 +18,77 @@ import {
     ModalFooter,
   } from "@heroui/react";
 import { Select, SelectItem } from "@heroui/react";
-import { useEffect } from "react";
-
 
 const CompetitionPage = () => {
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("problems");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [competition, setCompetition] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
 
-  const [content, setContent] = useState({ problems: "", rulebook: "" });
+  useEffect(() => {
+    const fetchCompetition = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch competition data');
+        }
+        const data = await response.json();
+        setCompetition(data.competition);
+      } catch (err) {
+        setError(err.message);
+        toast.error('Error fetching competition data');
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchCompetition();
+  }, [id]);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${id}/participants/leaderboard`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch leaderboard data');
+        }
+        const data = await response.json();
+        setLeaderboard(data.participants || []);
+      } catch (err) {
+        console.error('Error fetching leaderboard:', err);
+        toast.error('Error fetching leaderboard data');
+      }
+    };
+
+    if (activeTab === "leaderboard") {
+      fetchLeaderboard();
+    }
+  }, [id, activeTab]);
+
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${id}/announcements`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch announcements');
+        }
+        const data = await response.json();
+        setAnnouncements(data.announcements || []);
+      } catch (err) {
+        console.error('Error fetching announcements:', err);
+        toast.error('Error fetching announcements');
+      }
+    };
+
+    if (activeTab === "announcements") {
+      fetchAnnouncements();
+    }
+  }, [id, activeTab]);
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -36,59 +99,7 @@ const CompetitionPage = () => {
       console.log("Uploading:", selectedFile);
       setIsModalOpen(false);
     } else {
-      alert("Please select a file first!");
-    }
-  };
-
-  // Fetch data from API
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("YOUR_API_URL_HERE");
-        const data = await response.json();
-
-        // Assuming API response has "problems" and "rulebook" keys
-        setContent({
-          problems: data.problems || "No problems available.",
-          rulebook: data.rulebook || "No rulebook available.",
-        });
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const [announcements, setAnnouncements] = useState([
-    {
-      id: 1,
-      author: "Admin",
-      content: "Welcome to Code Clash!",
-      timestamp: "2025-02-16",
-    },
-    {
-      id: 2,
-      author: "Admin",
-      content: "Submit your solutions before midnight!",
-      timestamp: "2025-02-15",
-    },
-  ]);
-  const [newAnnouncement, setNewAnnouncement] = useState("");
-  const isAdmin = true; // Change this to false for normal users
-
-  const handlePostAnnouncement = () => {
-    if (newAnnouncement.trim() !== "") {
-      setAnnouncements([
-        {
-          id: Date.now(),
-          author: "Admin",
-          content: newAnnouncement,
-          timestamp: new Date().toISOString().split("T")[0],
-        },
-        ...announcements,
-      ]);
-      setNewAnnouncement("");
+      toast.error("Please select a file first!");
     }
   };
 
@@ -99,34 +110,27 @@ const CompetitionPage = () => {
     { key: "announcements", label: "Announcements" },
   ];
 
-  const competition = {
-    title: "Code Clash",
-    description: "A challenging JavaScript coding competition.",
-    admin: "John Doe",
-    info: "This competition tests your JavaScript skills in problem-solving, efficiency, and best practices. You will tackle a variety of problems ranging from algorithms to real-world coding scenarios. Ensure you read the rulebook and adhere to the competition guidelines for a fair play experience. Winners will be determined based on correctness, efficiency, and clarity of solutions.",
-  };
+  if (loading) {
+    return <div className="p-6 text-center">Loading...</div>;
+  }
 
-  const leaderboardData = [
-    { key: "1", name: "Alice Johnson", rank: "1", score: 95 },
-    { key: "2", name: "Bob Smith", rank: "2", score: 90 },
-    { key: "3", name: "Charlie Brown", rank: "3", score: 88 },
-    { key: "4", name: "David Green", rank: "4", score: 80 },
-  ];
+  if (error) {
+    return <div className="p-6 text-center text-red-600">Error: {error}</div>;
+  }
 
-  const columns = [
-    { key: "name", label: "NAME" },
-    { key: "rank", label: "RANK" },
-    { key: "score", label: "SCORE" },
-  ];
+  if (!competition) {
+    return <div className="p-6 text-center">Competition not found</div>;
+  }
 
   return (
     <div className="h-screen w-full flex flex-col bg-gray-100 overflow-y-auto">
+      <Toaster />
       {/* Competition Header */}
       <div className="bg-red text-white py-12 px-6 md:px-10">
-        <h1 className="text-2xl md:text-4xl font-bold">{competition.title}</h1>
-        <p className="text-sm md:text-lg mt-2">{competition.description}</p>
+        <h1 className="text-2xl md:text-4xl font-bold">{competition.compName}</h1>
+        <p className="text-sm md:text-lg mt-2">{competition.compDescription}</p>
         <p className="text-sm md:text-md mt-1">
-          <strong>Admin:</strong> {competition.admin}
+          <strong>Admin:</strong> {competition.compOwnerUserId.username}
         </p>
       </div>
 
@@ -134,14 +138,14 @@ const CompetitionPage = () => {
       <div className="bg-white shadow-md px-6 md:px-10 py-10 border-b border-gray-300">
         <h2 className="text-lg md:text-xl font-semibold">Competition Info</h2>
         <p className="text-sm md:text-base text-gray-700 mt-2">
-          {competition.info}
+          {competition.compDescription}
         </p>
       </div>
 
       {/* Tabs Navigation */}
       <div className="bg-white shadow-md py-3 px-4">
         {/* Show tabs as buttons on larger screens */}
-        <div className="max-[869px]:hidden  flex justify-center space-x-6">
+        <div className="max-[869px]:hidden flex justify-center space-x-6">
           {tabs.map((tab) => (
             <button
               key={tab.key}
@@ -158,72 +162,67 @@ const CompetitionPage = () => {
         </div>
 
         {/* Show dropdown on mobile screens */}
-        <div className="min-[870px]:hidden flex w-full flex-wrap ">
+        <div className="min-[870px]:hidden flex w-full flex-wrap">
           <Select
-            className="w-full border-1 rounded-lg" // Increased border radius
+            className="w-full border-1 rounded-lg"
             selectedKey={activeTab}
             onSelectionChange={(selection) => {
               const selectedKey = selection?.currentKey || selection;
-              console.log("Selected Key:", selectedKey);
               setActiveTab(String(selectedKey));
             }}
           >
             {tabs.map((tab) => (
-              <SelectItem
-                key={tab.key}
-                className="bg-red text-white rounded-lg" // Rounder edges for items
-              >
+              <SelectItem key={tab.key} className="bg-red text-white rounded-lg">
                 {tab.label}
               </SelectItem>
             ))}
           </Select>
         </div>
-        <Button className="bg-red rounded-lg w-32 mr-auto text-white" onClick={() => setIsModalOpen(true)}>
-        Submit
-      </Button>
+        <Button 
+          className="bg-red rounded-lg w-32 mr-auto text-white" 
+          onClick={() => setIsModalOpen(true)}
+        >
+          Submit
+        </Button>
       </div>
 
       {/* Tab Content */}
       <div className="flex-1 px-6 md:px-10 py-6">
         {activeTab === "announcements" && (
-          <div>
-            {isAdmin && (
-              <div className="mb-4 p-4 bg-white rounded-lg shadow-md">
-                <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400"
-                  placeholder="Post an announcement..."
-                  value={newAnnouncement}
-                  onChange={(e) => setNewAnnouncement(e.target.value)}
-                ></textarea>
-                <button
-                  className="mt-2 bg-red text-white px-4 py-2 rounded-lg hover:bg-red-700"
-                  onClick={handlePostAnnouncement}
-                >
-                  Post
-                </button>
+          <div className="space-y-4">
+            {announcements.map((announcement, index) => (
+              <div
+                key={index}
+                className="p-4 bg-white rounded-lg shadow-md border border-gray-300"
+              >
+                <p className="font-semibold text-gray-800">
+                  {competition.compOwnerUserId.username}
+                </p>
+                <p className="text-gray-700 mt-1">{announcement}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {new Date().toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+            {announcements.length === 0 && (
+              <div className="text-center text-gray-500">
+                No announcements yet
               </div>
             )}
-            <div className="space-y-4">
-              {announcements.map((announcement) => (
-                <div
-                  key={announcement.id}
-                  className="p-4 bg-white rounded-lg shadow-md border border-gray-300"
-                >
-                  <p className="font-semibold text-gray-800">
-                    {announcement.author}
-                  </p>
-                  <p className="text-gray-700 mt-1">{announcement.content}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {announcement.timestamp}
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
         )}
 
-        {activeTab === "problems" && <div>{content.problems}</div>}
-        {activeTab === "rulebook" && <div>{content.rulebook}</div>}
+        {activeTab === "problems" && (
+          <div className="prose max-w-none">
+            {competition.problemStatement}
+          </div>
+        )}
+        
+        {activeTab === "rulebook" && (
+          <div className="prose max-w-none whitespace-pre-line">
+            {competition.compRuleBook}
+          </div>
+        )}
 
         {activeTab === "leaderboard" && (
           <div>
@@ -232,37 +231,39 @@ const CompetitionPage = () => {
                 aria-label="Competition Leaderboard"
                 className="border border-gray-300 shadow-md rounded-xl overflow-hidden"
               >
-                <TableHeader columns={columns}>
-                  {(column) => (
-                    <TableColumn className="bg-dark text-white p-3 font-semibold border-b border-gray-300">
-                      {column.label}
-                    </TableColumn>
-                  )}
+                <TableHeader>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">NAME</TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">SCORE</TableColumn>
                 </TableHeader>
-                <TableBody items={leaderboardData}>
-                  {(item) => (
-                    <TableRow
-                      key={item.key}
-                      className="hover:bg-gray-100 transition"
-                    >
-                      {(columnKey) => (
-                        <TableCell className="p-4 border-b border-gray-300 text-gray-700">
-                          {getKeyValue(item, columnKey)}
-                        </TableCell>
-                      )}
+                <TableBody>
+                  {leaderboard.map((entry) => (
+                    <TableRow key={entry.participant._id} className="hover:bg-gray-100 transition">
+                      <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                        {entry.participant.username}
+                      </TableCell>
+                      <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                        {entry.points}
+                      </TableCell>
                     </TableRow>
-                  )}
+                  ))}
                 </TableBody>
               </Table>
             </div>
           </div>
         )}
       </div>
+
       {/* File Upload Modal */}
       <Modal className="bg-white rounded-lg" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <ModalContent>
-          <ModalHeader>Upload Your File</ModalHeader>
+          <ModalHeader>Upload Your Solution</ModalHeader>
           <ModalBody>
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold mb-2">Submission Rules</h3>
+              <div className="text-sm text-gray-600 whitespace-pre-line">
+                {competition.submissionRules}
+              </div>
+            </div>
             <input
               type="file"
               className="border p-2 w-full rounded-lg"
