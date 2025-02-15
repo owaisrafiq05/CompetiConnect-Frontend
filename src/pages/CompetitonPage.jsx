@@ -179,7 +179,7 @@ const CompetitionPage = () => {
           </Select>
         </div>
         <Button className="bg-red rounded-lg w-32 mr-auto text-white" onClick={() => setIsModalOpen(true)}>
-        Submit
+        Join Now
       </Button>
       </div>
 
@@ -270,7 +270,7 @@ const CompetitionPage = () => {
             />
           </ModalBody>
           <ModalFooter>
-            <Button className="bg-gray-500 rounded-lg" onClick={() => setIsModalOpen(false)}>
+            <Button className="bg-gray-500" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
             <Button className="bg-red text-white rounded-lg" onClick={handleUpload}>

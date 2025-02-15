@@ -3,66 +3,71 @@ import React, { useState, useEffect } from "react";
 import Banner from "../assets/components/Banner";
 import Cards from "../assets/components/Cards";
 import Title from "../assets/components/Title"
+import AddCompetition from "../assets/components/AddCompetition";
+import { Button } from "@heroui/react";
+
 
 
 const Home = () => {
   const [competitions, setCompetitions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+   const [isModalOpen, setIsModalOpen] = useState(false);
+  
 
-  useEffect(() => {
-    const fetchCompetitions = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/comp`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch competitions');
-        }
-        const data = await response.json();
-        // Transform the API data to match our CompetitionCard props structure
-        const transformedData = data.competitions.map(comp => ({
-          id: comp._id,
-          name: comp.compName,
-          description: comp.compDescription,
-          admin: comp.compType,
-          entryFee: comp.price === 0 ? "Free" : `$${comp.price}`,
-          isPrivate: comp.isPrivate
-        }));
-        setCompetitions(transformedData);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+//   useEffect(() => {
+//     const fetchCompetitions = async () => {
+//       try {
+//         const response = await fetch(`${import.meta.env.VITE_API_URL}/comp`);
+//         if (!response.ok) {
+//           throw new Error('Failed to fetch competitions');
+//         }
+//         const data = await response.json();
+//         // Transform the API data to match our CompetitionCard props structure
+//         const transformedData = data.competitions.map(comp => ({
+//           id: comp._id,
+//           name: comp.compName,
+//           description: comp.compDescription,
+//           admin: comp.compType,
+//           entryFee: comp.price === 0 ? "Free" : `$${comp.price}`,
+//           isPrivate: comp.isPrivate
+//         }));
+//         setCompetitions(transformedData);
+//       } catch (err) {
+//         setError(err.message);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
 
-    fetchCompetitions();
-  }, []);
+//     fetchCompetitions();
+//   }, []);
 
-  if (loading) {
-    return <div className="p-6 text-center">Loading...</div>;
-  }
+//   if (loading) {
+//     return <div className="p-6 text-center">Loading...</div>;
+//   }
 
-  if (error) {
-    return <div className="p-6 text-center text-red-600">Error: {error}</div>;
-  }
+//   if (error) {
+//     return <div className="p-6 text-center text-red-600">Error: {error}</div>;
+//   }
 
   return (
-    // <div className="flex">
-    //   {/* Sidebar */}
-    //   <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
-
-    //   {/* Main Content Area */}
-    //   <div className="flex-1 h-screen overflow-y-auto bg-gray-100">
-    //     {/* Navbar for Mobile */}
-    //     <Navbar toggleSidebar={toggleSidebar} />
-
-    //     {/* Page Content */}
         <div>
           <Banner/>
           <div className="p-6">
           <Title subtitle="Join A Competition" title="Select a challenge and showcase your skills" />
           <Cards competitions={competitions} />
-          </div>
+          <Button
+          className="bg-red-500 rounded-lg w-full mt-4 text-white"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Add Competition
+        </Button>
+      </div>
+
+      {/* Pass isOpen prop correctly */}
+      <AddCompetition isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        
         </div>
 
   );
