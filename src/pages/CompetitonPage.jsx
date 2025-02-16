@@ -158,13 +158,32 @@ const CompetitionPage = () => {
     setIsLeaderboard(!isLeaderboard);
   };
 
-  const tabs = [
-    { key: "applications", label: "Applications" },
-    { key: "problems", label: "Problems" },
-    { key: "rulebook", label: "Rulebook" },
-    { key: "leaderboard", label: "Leaderboard" },
-    { key: "announcements", label: "Announcements" },
-  ];
+  // Add function to get current user ID from cookie
+  const getCurrentUserId = () => {
+    const uidCookie = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('userID='));
+    return uidCookie ? uidCookie.split('=')[1] : null;
+  };
+
+  // Create tabs array based on user ownership
+  const getTabs = () => {
+    const baseTabs = [
+      { key: "problems", label: "Problems" },
+      { key: "rulebook", label: "Rulebook" },
+      { key: "leaderboard", label: "Leaderboard" },
+      { key: "announcements", label: "Announcements" },
+    ];
+
+    const currentUserId = getCurrentUserId();
+    
+    // Add applications tab only if current user is the owner
+    if (competition && currentUserId === competition.compOwnerUserId._id) {
+      baseTabs.unshift({ key: "applications", label: "Applications" });
+    }
+
+    return baseTabs;
+  };
 
   if (loading) {
     return <div className="p-6 text-center">Loading...</div>;
@@ -204,7 +223,7 @@ const CompetitionPage = () => {
       <div className="bg-white shadow-md py-3 px-4">
         {/* Show tabs as buttons on larger screens */}
         <div className="max-[869px]:hidden flex justify-center space-x-6">
-          {tabs.map((tab) => (
+          {getTabs().map((tab) => (
             <button
               key={tab.key}
               className={`py-2 px-6 text-md font-medium border-b-4 transition-all ${
@@ -229,7 +248,7 @@ const CompetitionPage = () => {
               setActiveTab(String(selectedKey));
             }}
           >
-            {tabs.map((tab) => (
+            {getTabs().map((tab) => (
               <SelectItem
                 key={tab.key}
                 className="bg-red text-white rounded-lg"
