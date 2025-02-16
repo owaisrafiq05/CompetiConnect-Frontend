@@ -101,9 +101,11 @@ const CompetitionPage = () => {
   useEffect(() => {
     const fetchRegistrations = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${id}/registrations`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/comp/${id}/registrations`
+        );
         if (!response.ok) {
-          throw new Error('Failed to fetch registrations');
+          throw new Error("Failed to fetch registrations");
         }
         const data = await response.json();
         setRegistrations(data.registrations);
@@ -132,16 +134,19 @@ const CompetitionPage = () => {
 
   const handleAccept = async (userId) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${id}/approve`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/comp/${id}/approve`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to approve user');
+        throw new Error("Failed to approve user");
       }
 
       const data = await response.json();
@@ -158,13 +163,32 @@ const CompetitionPage = () => {
     setIsLeaderboard(!isLeaderboard);
   };
 
-  const tabs = [
-    { key: "applications", label: "Applications" },
-    { key: "problems", label: "Problems" },
-    { key: "rulebook", label: "Rulebook" },
-    { key: "leaderboard", label: "Leaderboard" },
-    { key: "announcements", label: "Announcements" },
-  ];
+  // Add function to get current user ID from cookie
+  const getCurrentUserId = () => {
+    const uidCookie = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('userID='));
+    return uidCookie ? uidCookie.split('=')[1] : null;
+  };
+
+  // Create tabs array based on user ownership
+  const getTabs = () => {
+    const baseTabs = [
+      { key: "problems", label: "Problems" },
+      { key: "rulebook", label: "Rulebook" },
+      { key: "leaderboard", label: "Leaderboard" },
+      { key: "announcements", label: "Announcements" },
+    ];
+
+    const currentUserId = getCurrentUserId();
+    
+    // Add applications tab only if current user is the owner
+    if (competition && currentUserId === competition.compOwnerUserId._id) {
+      baseTabs.unshift({ key: "applications", label: "Applications" });
+    }
+
+    return baseTabs;
+  };
 
   if (loading) {
     return <div className="p-6 text-center">Loading...</div>;
@@ -204,7 +228,7 @@ const CompetitionPage = () => {
       <div className="bg-white shadow-md py-3 px-4">
         {/* Show tabs as buttons on larger screens */}
         <div className="max-[869px]:hidden flex justify-center space-x-6">
-          {tabs.map((tab) => (
+          {getTabs().map((tab) => (
             <button
               key={tab.key}
               className={`py-2 px-6 text-md font-medium border-b-4 transition-all ${
@@ -229,7 +253,7 @@ const CompetitionPage = () => {
               setActiveTab(String(selectedKey));
             }}
           >
-            {tabs.map((tab) => (
+            {getTabs().map((tab) => (
               <SelectItem
                 key={tab.key}
                 className="bg-red text-white rounded-lg"
@@ -240,14 +264,12 @@ const CompetitionPage = () => {
           </Select>
         </div>
         <Button
-          className="bg-red rounded-lg w-32 text-white"
+          className="bg-red rounded-lg w-32 justify text-white"
           onClick={() => setIsModalOpen(true)}
         >
           Submit
         </Button>
       </div>
-
-      
 
       {/* Tab Content */}
       <div className="flex-1 px-6 md:px-10 py-6">
@@ -293,12 +315,24 @@ const CompetitionPage = () => {
                 className="border border-gray-300 shadow-md rounded-xl overflow-hidden"
               >
                 <TableHeader>
-                  <TableColumn className="bg-dark text-white p-3 font-semibold">Username</TableColumn>
-                  <TableColumn className="bg-dark text-white p-3 font-semibold">Email</TableColumn>
-                  <TableColumn className="bg-dark text-white p-3 font-semibold">Competition Name</TableColumn>
-                  <TableColumn className="bg-dark text-white p-3 font-semibold">Description</TableColumn>
-                  <TableColumn className="bg-dark text-white p-3 font-semibold">Date Registered</TableColumn>
-                  <TableColumn className="bg-dark text-white p-3 font-semibold">Actions</TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    Username
+                  </TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    Email
+                  </TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    Competition Name
+                  </TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    Description
+                  </TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    Date Registered
+                  </TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    Actions
+                  </TableColumn>
                 </TableHeader>
                 <TableBody>
                   {registrations.map((registration) => (
@@ -322,7 +356,7 @@ const CompetitionPage = () => {
                         {new Date(registration.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="p-4 border-b border-gray-300 text-gray-700">
-                        <Button 
+                        <Button
                           className="bg-green-500 text-white rounded-lg"
                           onClick={() => handleAccept(registration.userId._id)}
                         >
@@ -371,6 +405,70 @@ const CompetitionPage = () => {
             </div>
           </div>
         )}
+
+{activeTab === "submissions" && (
+  <div>
+    <div className="overflow-x-auto">
+      <Table
+        aria-label="Competition Leaderboard"
+        className="border border-gray-300 shadow-md rounded-xl overflow-hidden"
+      >
+        <TableHeader>
+          <TableColumn className="bg-dark text-white p-3 font-semibold">
+            NAME
+          </TableColumn>
+          <TableColumn className="bg-dark text-white p-3 font-semibold">
+            EMAIL
+          </TableColumn>
+          <TableColumn className="bg-dark text-white p-3 font-semibold">
+            SUBMISSION
+          </TableColumn>
+          <TableColumn className="bg-dark text-white p-3 font-semibold">
+            GRADING
+          </TableColumn>
+        </TableHeader>
+        <TableBody>
+          {leaderboard.map((entry, index) => (
+            <TableRow
+              key={entry.participant._id}
+              className="hover:bg-gray-100 transition"
+            >
+              <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                {entry.participant.username}
+              </TableCell>
+              <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                {entry.participant.email}
+              </TableCell>
+              <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                {entry.submissionUrl ? (
+                  <a
+                    href={entry.submissionUrl}
+                    download
+                    className="text-blue-600 hover:underline flex items-center space-x-2"
+                  >
+                    📂 <span>Download</span>
+                  </a>
+                ) : (
+                  <span className="text-gray-400">No Submission</span>
+                )}
+              </TableCell>
+              <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                <input
+                  type="text"
+                  className="border rounded-md px-2 py-1 w-20 text-center"
+                  placeholder="Grade"
+                  value={entry.grade || ""}
+                  onChange={(e) => handleGradeChange(index, e.target.value)}
+                />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  </div>
+)}
+
       </div>
 
       {/* File Upload Modal */}
