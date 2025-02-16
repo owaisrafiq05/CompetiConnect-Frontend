@@ -19,7 +19,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       setIsSignedIn(true); // Check if token exists
       
       // Fetch user details from the API using the correct uid
-      axios.get(`http://localhost:5000/auth/user/${uidValue}`) // Use uidValue directly in the URL
+      axios.get(`${import.meta.env.VITE_API_URL}/auth/user/${uidValue}`) // Use uidValue directly in the URL
         .then(response => {
           if (response.data.message === "User details fetched successfully") {
             const { username, email } = response.data.data; // Extract username and email
