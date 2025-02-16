@@ -55,22 +55,23 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <h2 className="text-xl font-bold tracking-wide">CompetiConnect</h2>
 
         <ul className="mt-8 space-y-2">
-          <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-            <Link to="/">Home</Link>
-          </li>
-          <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-            <Link to="/competitions">My Competitions</Link>
-          </li>
-          <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-            <Link to="/explore">Explore</Link>
-          </li>
-          <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-            <Link to="/profile">Profile</Link>
-          </li>
-          <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
-          <Link to="/competition-page">compname</Link>
-          </li>
-          <li><Button className="bg-red rounded-lg w-full mt-1 text-white" onClick={() => setIsModalOpen(true)}>
+        <Link to="/">
+          <li className="p-3 mb-2 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
+            Home
+          </li></Link>
+          <Link to="/competitions">
+          <li className="p-3 mb-2 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
+            My Competitions
+          </li></Link>
+          <Link to="/explore">
+          <li className="p-3 mb-2 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
+            Explore
+          </li></Link>
+          <Link to="/profile">
+          <li className="p-3 mb-2 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
+            Profile
+          </li></Link>
+          <li><Button className="bg-red mb-1 rounded-lg w-full mt-1 text-white" onClick={() => setIsModalOpen(true)}>
         Add Competition
       </Button></li>
         </ul>
