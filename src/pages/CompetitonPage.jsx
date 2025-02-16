@@ -2,21 +2,21 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { toast, Toaster } from "sonner";
 import {
-    Table,
-    TableHeader,
-    TableColumn,
-    TableBody,
-    TableRow,
-    TableCell,
-    getKeyValue,
-    Input,
-    Button,
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-  } from "@heroui/react";
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  getKeyValue,
+  Input,
+  Button,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@heroui/react";
 import { Select, SelectItem } from "@heroui/react";
 
 const CompetitionPage = () => {
@@ -33,15 +33,17 @@ const CompetitionPage = () => {
   useEffect(() => {
     const fetchCompetition = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${id}`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/comp/${id}`
+        );
         if (!response.ok) {
-          throw new Error('Failed to fetch competition data');
+          throw new Error("Failed to fetch competition data");
         }
         const data = await response.json();
         setCompetition(data.competition);
       } catch (err) {
         setError(err.message);
-        toast.error('Error fetching competition data');
+        toast.error("Error fetching competition data");
       } finally {
         setLoading(false);
       }
@@ -53,15 +55,17 @@ const CompetitionPage = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${id}/participants/leaderboard`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/comp/${id}/participants/leaderboard`
+        );
         if (!response.ok) {
-          throw new Error('Failed to fetch leaderboard data');
+          throw new Error("Failed to fetch leaderboard data");
         }
         const data = await response.json();
         setLeaderboard(data.participants || []);
       } catch (err) {
-        console.error('Error fetching leaderboard:', err);
-        toast.error('Error fetching leaderboard data');
+        console.error("Error fetching leaderboard:", err);
+        toast.error("Error fetching leaderboard data");
       }
     };
 
@@ -70,18 +74,21 @@ const CompetitionPage = () => {
     }
   }, [id, activeTab]);
 
+
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${id}/announcements`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/comp/${id}/announcements`
+        );
         if (!response.ok) {
-          throw new Error('Failed to fetch announcements');
+          throw new Error("Failed to fetch announcements");
         }
         const data = await response.json();
         setAnnouncements(data.announcements || []);
       } catch (err) {
-        console.error('Error fetching announcements:', err);
-        toast.error('Error fetching announcements');
+        console.error("Error fetching announcements:", err);
+        toast.error("Error fetching announcements");
       }
     };
 
@@ -104,6 +111,7 @@ const CompetitionPage = () => {
   };
 
   const tabs = [
+    { key: "applications", label: "Applications" },
     { key: "problems", label: "Problems" },
     { key: "rulebook", label: "Rulebook" },
     { key: "leaderboard", label: "Leaderboard" },
@@ -127,7 +135,9 @@ const CompetitionPage = () => {
       <Toaster />
       {/* Competition Header */}
       <div className="bg-red text-white py-12 px-6 md:px-10">
-        <h1 className="text-2xl md:text-4xl font-bold">{competition.compName}</h1>
+        <h1 className="text-2xl md:text-4xl font-bold">
+          {competition.compName}
+        </h1>
         <p className="text-sm md:text-lg mt-2">{competition.compDescription}</p>
         <p className="text-sm md:text-md mt-1">
           <strong>Admin:</strong> {competition.compOwnerUserId.username}
@@ -172,14 +182,17 @@ const CompetitionPage = () => {
             }}
           >
             {tabs.map((tab) => (
-              <SelectItem key={tab.key} className="bg-red text-white rounded-lg">
+              <SelectItem
+                key={tab.key}
+                className="bg-red text-white rounded-lg"
+              >
                 {tab.label}
               </SelectItem>
             ))}
           </Select>
         </div>
-        <Button 
-          className="bg-red rounded-lg w-32 mr-auto text-white" 
+        <Button
+          className="bg-red rounded-lg w-32 mr-auto text-white"
           onClick={() => setIsModalOpen(true)}
         >
           Submit
@@ -213,14 +226,49 @@ const CompetitionPage = () => {
         )}
 
         {activeTab === "problems" && (
-          <div className="prose max-w-none">
-            {competition.problemStatement}
-          </div>
+          <div className="prose max-w-none">{competition.problemStatement}</div>
         )}
-        
+
         {activeTab === "rulebook" && (
           <div className="prose max-w-none whitespace-pre-line">
             {competition.compRuleBook}
+          </div>
+        )}
+
+        {activeTab === "applications" && (
+          <div>
+            <div className="overflow-x-auto">
+              <Table
+                aria-label="Competition Leaderboard"
+                className="border border-gray-300 shadow-md rounded-xl overflow-hidden"
+              >
+                <TableHeader>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    NAME
+                  </TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    ACTIONS
+                  </TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {leaderboard.map((entry) => (
+                    <TableRow
+                      key={entry.participant._id}
+                      className="hover:bg-gray-100 transition"
+                    >
+                      <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                        {entry.participant.username}
+                      </TableCell>
+                      <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                        <button className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition">
+                          Accept
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )}
 
@@ -232,12 +280,19 @@ const CompetitionPage = () => {
                 className="border border-gray-300 shadow-md rounded-xl overflow-hidden"
               >
                 <TableHeader>
-                  <TableColumn className="bg-dark text-white p-3 font-semibold">NAME</TableColumn>
-                  <TableColumn className="bg-dark text-white p-3 font-semibold">SCORE</TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    NAME
+                  </TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    SCORE
+                  </TableColumn>
                 </TableHeader>
                 <TableBody>
                   {leaderboard.map((entry) => (
-                    <TableRow key={entry.participant._id} className="hover:bg-gray-100 transition">
+                    <TableRow
+                      key={entry.participant._id}
+                      className="hover:bg-gray-100 transition"
+                    >
                       <TableCell className="p-4 border-b border-gray-300 text-gray-700">
                         {entry.participant.username}
                       </TableCell>
@@ -254,7 +309,11 @@ const CompetitionPage = () => {
       </div>
 
       {/* File Upload Modal */}
-      <Modal className="bg-white rounded-lg" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal
+        className="bg-white rounded-lg"
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      >
         <ModalContent>
           <ModalHeader>Upload Your Solution</ModalHeader>
           <ModalBody>
@@ -271,10 +330,16 @@ const CompetitionPage = () => {
             />
           </ModalBody>
           <ModalFooter>
-            <Button className="bg-gray-500" onClick={() => setIsModalOpen(false)}>
+            <Button
+              className="bg-gray-500"
+              onClick={() => setIsModalOpen(false)}
+            >
               Cancel
             </Button>
-            <Button className="bg-red text-white rounded-lg" onClick={handleUpload}>
+            <Button
+              className="bg-red text-white rounded-lg"
+              onClick={handleUpload}
+            >
               Upload
             </Button>
           </ModalFooter>

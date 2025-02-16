@@ -8,6 +8,7 @@ import { Button } from "@heroui/react";
 
 
 
+
 const Home = () => {
   const [competitions, setCompetitions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,11 +64,12 @@ const Home = () => {
         >
           Add Competition
         </Button>
+
       </div>
 
       {/* Pass isOpen prop correctly */}
       <AddCompetition isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-        
+      
         </div>
 
   );
