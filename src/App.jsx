@@ -10,6 +10,7 @@ import CompetitonPage from "./pages/CompetitonPage";
 import Login from "./pages/Login";
 import SignUp from "./pages/Signup"
 import { toast , Toaster } from "sonner";
+import AddComp from "./pages/AddComp";
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,6 +46,7 @@ const App = () => {
             <Route path="/explore" element={<Explore />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/competition-page/:id" element={<CompetitonPage/>} />
+            <Route path="/add-comp" element={<AddComp/>} />
             <Route path="/login" element={<Login/>} />
             <Route path="/signup" element={<SignUp/>} />
           </Routes>

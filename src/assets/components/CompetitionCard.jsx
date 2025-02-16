@@ -105,6 +105,7 @@ const CompetitionCard = ({ comp }) => {
 
   return (
     <>
+      
       <Card className="relative min-h-[280px] max-w-[350px] bg-dark text-white shadow-lg border-4 border-transparent animate-border rounded-xl 
         transition-all duration-300 ease-in-out hover:shadow-[0px_0px_20px_rgba(255,255,255,0.7)] hover:scale-105 p-4">
       
