@@ -29,6 +29,8 @@ const CompetitionPage = () => {
   const [competition, setCompetition] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
+  const [registrations, setRegistrations] = useState([]);
+  const [isLeaderboard, setIsLeaderboard] = useState(false);
 
   useEffect(() => {
     const fetchCompetition = async () => {
@@ -61,8 +63,8 @@ const CompetitionPage = () => {
         if (!response.ok) {
           throw new Error("Failed to fetch leaderboard data");
         }
-        const data = await response.json();
-        setLeaderboard(data.participants || []);
+        const xdata = await response.json();
+        setLeaderboard(xdata.participants || []);
       } catch (err) {
         console.error("Error fetching leaderboard:", err);
         toast.error("Error fetching leaderboard data");
@@ -73,7 +75,6 @@ const CompetitionPage = () => {
       fetchLeaderboard();
     }
   }, [id, activeTab]);
-
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
@@ -97,6 +98,25 @@ const CompetitionPage = () => {
     }
   }, [id, activeTab]);
 
+  useEffect(() => {
+    const fetchRegistrations = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${id}/registrations`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch registrations');
+        }
+        const data = await response.json();
+        setRegistrations(data.registrations);
+      } catch (err) {
+        toast.error(err.message);
+      }
+    };
+
+    if (activeTab === "applications") {
+      fetchRegistrations();
+    }
+  }, [id, activeTab]);
+
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
   };
@@ -108,6 +128,34 @@ const CompetitionPage = () => {
     } else {
       toast.error("Please select a file first!");
     }
+  };
+
+  const handleAccept = async (userId) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${id}/approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to approve user');
+      }
+
+      const data = await response.json();
+      toast.success(data.message);
+
+      // Refresh the registrations after approval
+      await fetchRegistrations();
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
+  const toggleTab = () => {
+    setIsLeaderboard(!isLeaderboard);
   };
 
   const tabs = [
@@ -239,30 +287,45 @@ const CompetitionPage = () => {
           <div>
             <div className="overflow-x-auto">
               <Table
-                aria-label="Competition Leaderboard"
+                aria-label="Applications Table"
                 className="border border-gray-300 shadow-md rounded-xl overflow-hidden"
               >
                 <TableHeader>
-                  <TableColumn className="bg-dark text-white p-3 font-semibold">
-                    NAME
-                  </TableColumn>
-                  <TableColumn className="bg-dark text-white p-3 font-semibold">
-                    ACTIONS
-                  </TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">Username</TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">Email</TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">Competition Name</TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">Description</TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">Date Registered</TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">Actions</TableColumn>
                 </TableHeader>
                 <TableBody>
-                  {leaderboard.map((entry) => (
+                  {registrations.map((registration) => (
                     <TableRow
-                      key={entry.participant._id}
+                      key={registration._id}
                       className="hover:bg-gray-100 transition"
                     >
                       <TableCell className="p-4 border-b border-gray-300 text-gray-700">
-                        {entry.participant.username}
+                        {registration.userId.username}
                       </TableCell>
                       <TableCell className="p-4 border-b border-gray-300 text-gray-700">
-                        <button className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition">
+                        {registration.userId.email}
+                      </TableCell>
+                      <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                        {registration.competitionId.compName}
+                      </TableCell>
+                      <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                        {registration.competitionId.compDescription}
+                      </TableCell>
+                      <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                        {new Date(registration.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                        <Button 
+                          className="bg-green-500 text-white rounded-lg"
+                          onClick={() => handleAccept(registration.userId._id)}
+                        >
                           Accept
-                        </button>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
