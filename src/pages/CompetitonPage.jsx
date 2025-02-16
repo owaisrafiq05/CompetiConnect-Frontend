@@ -271,7 +271,7 @@ const CompetitionPage = () => {
             />
           </ModalBody>
           <ModalFooter>
-            <Button className="bg-gray-500 rounded-lg" onClick={() => setIsModalOpen(false)}>
+            <Button className="bg-gray-500" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
             <Button className="bg-red text-white rounded-lg" onClick={handleUpload}>

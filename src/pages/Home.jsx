@@ -3,12 +3,17 @@ import React, { useState, useEffect } from "react";
 import Banner from "../assets/components/Banner";
 import Cards from "../assets/components/Cards";
 import Title from "../assets/components/Title"
+import AddCompetition from "../assets/components/AddCompetition";
+import { Button } from "@heroui/react";
+
 
 
 const Home = () => {
   const [competitions, setCompetitions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+   const [isModalOpen, setIsModalOpen] = useState(false);
+  
 
   useEffect(() => {
     const fetchCompetitions = async () => {
@@ -47,22 +52,22 @@ const Home = () => {
   }
 
   return (
-    // <div className="flex">
-    //   {/* Sidebar */}
-    //   <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
-
-    //   {/* Main Content Area */}
-    //   <div className="flex-1 h-screen overflow-y-auto bg-gray-100">
-    //     {/* Navbar for Mobile */}
-    //     <Navbar toggleSidebar={toggleSidebar} />
-
-    //     {/* Page Content */}
         <div>
           <Banner/>
           <div className="p-6">
           <Title subtitle="Join A Competition" title="Select a challenge and showcase your skills" />
           <Cards competitions={competitions} />
-          </div>
+          <Button
+          className="bg-red-500 rounded-lg w-full mt-4 text-white"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Add Competition
+        </Button>
+      </div>
+
+      {/* Pass isOpen prop correctly */}
+      <AddCompetition isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        
         </div>
 
   );

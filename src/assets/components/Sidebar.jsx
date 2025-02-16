@@ -11,6 +11,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [isSignedIn, setIsSignedIn] = useState(false); // Dummy control for sign-in status
   const [userInfo, setUserInfo] = useState({ username: "", email: "" }); // State for user info
   const navigate = useNavigate(); // Initialize useNavigate
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const uid = document.cookie.split('; ').find(row => row.startsWith('userID='));
@@ -69,11 +70,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <li className="p-3 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
           <Link to="/competition-page">compname</Link>
           </li>
-          <li><Button className="bg-red rounded-lg w-full mt-1 text-white" onClick={``}>
+          <li><Button className="bg-red rounded-lg w-full mt-1 text-white" onClick={() => setIsModalOpen(true)}>
         Add Competition
       </Button></li>
         </ul>
       </div>
+
+      
 
       <div className="absolute bottom-4 left-0 w-full p-4 border-t border-gray-700">
         {isSignedIn ? (
