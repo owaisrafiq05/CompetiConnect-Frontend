@@ -71,11 +71,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               My Competitions
             </li>
           </Link>
-          <Link to="/profile">
+          {/* <Link to="/profile">
             <li className="p-3 mb-2 rounded-lg cursor-pointer transition duration-200 bg-b-dark hover:bg-gray-700">
               Profile
             </li>
-          </Link>
+          </Link> */}
           <Link to="/add-comp">
           <li>
             <Button
