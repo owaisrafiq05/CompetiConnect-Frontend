@@ -31,6 +31,8 @@ const CompetitionPage = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [registrations, setRegistrations] = useState([]);
   const [isLeaderboard, setIsLeaderboard] = useState(false);
+  const [submissions, setSubmissions] = useState([]);
+  const [editingPoints, setEditingPoints] = useState({});
 
   useEffect(() => {
     const fetchCompetition = async () => {
@@ -119,6 +121,28 @@ const CompetitionPage = () => {
     }
   }, [id, activeTab]);
 
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/comp/${id}/submissions`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch submissions");
+        }
+        const data = await response.json();
+        setSubmissions(data.submissions || []);
+      } catch (err) {
+        console.error("Error fetching submissions:", err);
+        toast.error("Error fetching submissions data");
+      }
+    };
+
+    if (activeTab === "submissions") {
+      fetchSubmissions();
+    }
+  }, [id, activeTab]);
+
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
   };
@@ -178,6 +202,7 @@ const CompetitionPage = () => {
       { key: "rulebook", label: "Rulebook" },
       { key: "leaderboard", label: "Leaderboard" },
       { key: "announcements", label: "Announcements" },
+      { key: "submissions", label: "Submissions" },
     ];
 
     const currentUserId = getCurrentUserId();
@@ -188,6 +213,36 @@ const CompetitionPage = () => {
     }
 
     return baseTabs;
+  };
+
+  // Add this new function to handle points update
+  const handlePointsUpdate = async (submissionId, newPoints) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/comp/${id}/submissions/${submissionId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ points: newPoints }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to update points');
+      }
+
+      // Update local state
+      setSubmissions(submissions.map(sub => 
+        sub._id === submissionId ? { ...sub, points: newPoints } : sub
+      ));
+      setEditingPoints({ ...editingPoints, [submissionId]: false });
+      toast.success('Points updated successfully');
+    } catch (err) {
+      toast.error('Failed to update points');
+      console.error(err);
+    }
   };
 
   if (loading) {
@@ -406,68 +461,101 @@ const CompetitionPage = () => {
           </div>
         )}
 
-{activeTab === "submissions" && (
-  <div>
-    <div className="overflow-x-auto">
-      <Table
-        aria-label="Competition Leaderboard"
-        className="border border-gray-300 shadow-md rounded-xl overflow-hidden"
-      >
-        <TableHeader>
-          <TableColumn className="bg-dark text-white p-3 font-semibold">
-            NAME
-          </TableColumn>
-          <TableColumn className="bg-dark text-white p-3 font-semibold">
-            EMAIL
-          </TableColumn>
-          <TableColumn className="bg-dark text-white p-3 font-semibold">
-            SUBMISSION
-          </TableColumn>
-          <TableColumn className="bg-dark text-white p-3 font-semibold">
-            GRADING
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {leaderboard.map((entry, index) => (
-            <TableRow
-              key={entry.participant._id}
-              className="hover:bg-gray-100 transition"
-            >
-              <TableCell className="p-4 border-b border-gray-300 text-gray-700">
-                {entry.participant.username}
-              </TableCell>
-              <TableCell className="p-4 border-b border-gray-300 text-gray-700">
-                {entry.participant.email}
-              </TableCell>
-              <TableCell className="p-4 border-b border-gray-300 text-gray-700">
-                {entry.submissionUrl ? (
-                  <a
-                    href={entry.submissionUrl}
-                    download
-                    className="text-blue-600 hover:underline flex items-center space-x-2"
-                  >
-                    📂 <span>Download</span>
-                  </a>
-                ) : (
-                  <span className="text-gray-400">No Submission</span>
-                )}
-              </TableCell>
-              <TableCell className="p-4 border-b border-gray-300 text-gray-700">
-                <input
-                  type="text"
-                  className="border rounded-md px-2 py-1 w-20 text-center"
-                  placeholder="Grade"
-                  value={entry.grade || ""}
-                  onChange={(e) => handleGradeChange(index, e.target.value)}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  </div>
-)}
+        {activeTab === "submissions" && (
+          <div>
+            <div className="overflow-x-auto">
+              <Table
+                aria-label="Submissions Table"
+                className="border border-gray-300 shadow-md rounded-xl overflow-hidden"
+              >
+                <TableHeader>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    USERNAME
+                  </TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    SUBMISSION
+                  </TableColumn>
+                  <TableColumn className="bg-dark text-white p-3 font-semibold">
+                    POINTS
+                  </TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {submissions.length === 0 ? (
+                    <TableRow>
+                      <TableCell className="text-center p-4">No submissions yet</TableCell>
+                      <TableCell className="text-center p-4">-</TableCell>
+                      <TableCell className="text-center p-4">-</TableCell>
+                    </TableRow>
+                  ) : (
+                    submissions.map((submission) => (
+                      <TableRow
+                        key={submission._id}
+                        className="hover:bg-gray-100 transition"
+                      >
+                        <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                          {submission.userId.username}
+                        </TableCell>
+                        <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                          {submission.zipFile ? (
+                            <a
+                              href={submission.zipFile}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline flex items-center space-x-2"
+                            >
+                              📂 <span>Download Submission</span>
+                            </a>
+                          ) : (
+                            <span className="text-gray-400">No File</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="p-4 border-b border-gray-300 text-gray-700">
+                          {editingPoints[submission._id] ? (
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                defaultValue={submission.points}
+                                className="w-20"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handlePointsUpdate(submission._id, e.target.value);
+                                  }
+                                }}
+                              />
+                              <Button
+                                size="sm"
+                                className="bg-green-500 text-white"
+                                onClick={() => handlePointsUpdate(submission._id, document.querySelector(`input[type="number"]`).value)}
+                              >
+                                Save
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <span>{submission.points ?? 'Pending'}</span>
+                              {competition?.compOwnerUserId?._id === getCurrentUserId() && (
+                                <Button
+                                  size="sm"
+                                  className="bg-blue-500 text-white"
+                                  onClick={() => setEditingPoints({ 
+                                    ...editingPoints, 
+                                    [submission._id]: true 
+                                  })}
+                                >
+                                  Edit
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
 
       </div>
 

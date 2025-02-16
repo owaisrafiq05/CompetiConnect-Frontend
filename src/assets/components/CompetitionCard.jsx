@@ -66,6 +66,8 @@ const CompetitionCard = ({ comp }) => {
         }
         
         toast.success('Successfully joined private competition!');
+        setIsModalOpen(false);
+        setSelectedFile(null);
       } else {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/comp/${comp.id}/participants`, {
           method: 'PATCH',
@@ -80,13 +82,8 @@ const CompetitionCard = ({ comp }) => {
         }
 
         toast.success('Successfully joined competition!');
+        navigate(`/competition-page/${comp.id}`);
       }
-
-      setIsModalOpen(false);
-      setSelectedFile(null);
-      
-      navigate(`/competition-page/${comp.id}`);
-      
     } catch (err) {
       toast.error(err.message);
       setError(err.message);
